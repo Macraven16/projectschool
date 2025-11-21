@@ -3,12 +3,12 @@ import { School, Student, FeeStructure, Transaction, User } from './types';
 export const MOCK_SCHOOLS: School[] = [
     {
         id: 'sch_1',
-        name: 'Green Valley High School',
+        name: 'Ghana Communication Technology University (GCTU)',
         logo: '/logos/school1.png',
         verified: true,
-        address: '123 Education Lane, Accra',
-        contactEmail: 'info@greenvalley.edu.gh',
-        contactPhone: '+233 20 123 4567',
+        address: 'Tesano, Accra',
+        contactEmail: 'info@gctu.edu.gh',
+        contactPhone: '+233 30 222 1446',
     },
     {
         id: 'sch_2',
@@ -25,7 +25,7 @@ export const MOCK_USERS: User[] = [
     {
         id: 'usr_admin',
         name: 'Admin User',
-        email: 'admin@greenvalley.edu.gh',
+        email: 'admin@gctu.edu.gh',
         role: 'ADMIN',
     },
     {
@@ -42,8 +42,9 @@ export const MOCK_STUDENTS: Student[] = [
         id: 'stu_1',
         userId: 'usr_student',
         schoolId: 'sch_1',
-        grade: 'Form 2',
-        studentIdNumber: 'GVHS-2023-001',
+        grade: 'Level 100',
+        studentIdNumber: 'GCTU-2023-001',
+        campus: 'Main Campus',
         balance: 1500.00,
     },
 ];

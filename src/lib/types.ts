@@ -36,6 +36,7 @@ export interface Student {
     schoolId: string;
     grade: string;
     studentIdNumber: string; // School specific ID
+    campus: string;
     balance: number;
 }
 

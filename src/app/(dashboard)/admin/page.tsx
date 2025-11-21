@@ -3,6 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MOCK_TRANSACTIONS, MOCK_STUDENTS } from "@/lib/mock-data";
 import { DollarSign, Users, TrendingUp, Activity } from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
 
 // Temporary Card component until we build the UI library properly
 function DashboardCard({
@@ -31,6 +33,7 @@ function DashboardCard({
 }
 
 export default function AdminDashboard() {
+    const { user } = useAuth();
     const totalRevenue = MOCK_TRANSACTIONS.reduce((acc, tx) => acc + tx.amount, 0);
     const totalStudents = MOCK_STUDENTS.length;
     const recentTransactions = MOCK_TRANSACTIONS.slice(0, 5);
@@ -38,7 +41,10 @@ export default function AdminDashboard() {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                    <p className="text-muted-foreground">Welcome back, {user?.name || "Admin"}</p>
+                </div>
                 <div className="flex items-center gap-2">
                     <button className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
                         Download Report
@@ -118,13 +124,16 @@ export default function AdminDashboard() {
                         </p>
                     </div>
                     <div className="p-6 pt-0 space-y-2">
-                        <button className="w-full justify-start text-left rounded-md border p-3 hover:bg-accent transition-colors text-sm font-medium">
+                        <Link href="/admin/fees" className="block w-full justify-start text-left rounded-md border p-3 hover:bg-accent transition-colors text-sm font-medium">
                             Create New Fee Structure
-                        </button>
-                        <button className="w-full justify-start text-left rounded-md border p-3 hover:bg-accent transition-colors text-sm font-medium">
+                        </Link>
+                        <Link href="/admin/students" className="block w-full justify-start text-left rounded-md border p-3 hover:bg-accent transition-colors text-sm font-medium">
                             Enroll New Student
-                        </button>
-                        <button className="w-full justify-start text-left rounded-md border p-3 hover:bg-accent transition-colors text-sm font-medium">
+                        </Link>
+                        <button
+                            onClick={() => alert("Payment reminders sent to all students with outstanding balances.")}
+                            className="w-full justify-start text-left rounded-md border p-3 hover:bg-accent transition-colors text-sm font-medium"
+                        >
                             Send Payment Reminders
                         </button>
                     </div>

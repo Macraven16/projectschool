@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 interface AuthContextType {
     user: User | null;
-    login: (email: string, role: User["role"]) => Promise<void>;
+    login: (email: string, role: User["role"], name?: string) => Promise<void>;
     logout: () => void;
     isLoading: boolean;
 }
@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
     }, []);
 
-    const login = async (email: string, role: User["role"]) => {
+    const login = async (email: string, role: User["role"], name?: string) => {
         setIsLoading(true);
         // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const userToSet = foundUser || {
             id: `usr_${Date.now()}`,
-            name: email.split("@")[0],
+            name: name || email.split("@")[0],
             email,
             role,
         };

@@ -5,17 +5,46 @@ import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { User } from "@/lib/types";
 
+const GHANA_UNIVERSITIES = [
+    "University of Ghana (UG)",
+    "Kwame Nkrumah University of Science and Technology (KNUST)",
+    "University of Cape Coast (UCC)",
+    "University of Education, Winneba (UEW)",
+    "Ghana Communication Technology University (GCTU)",
+    "Ghana Institute of Management and Public Administration (GIMPA)",
+    "University of Mines and Technology (UMaT)",
+    "University of Professional Studies, Accra (UPSA)",
+    "University of Health and Allied Sciences (UHAS)",
+    "University of Energy and Natural Resources (UENR)",
+    "University for Development Studies (UDS)",
+    "Accra Technical University (ATU)",
+    "Kumasi Technical University (KsTU)",
+    "Ashesi University",
+    "Central University",
+    "Valley View University",
+    "Other"
+];
+
 export default function SignupPage() {
     const { login, isLoading } = useAuth();
     const [email, setEmail] = useState("");
     const [name, setName] = useState("");
     const [role, setRole] = useState<User["role"]>("STUDENT");
 
+    // New Fields
+    const [university, setUniversity] = useState("");
+    const [indexNumber, setIndexNumber] = useState("");
+    const [phone, setPhone] = useState("");
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email || !name) return;
+
+        // In a real app, we would send all this data to the backend
+        console.log("Signup Data:", { email, name, role, university, indexNumber, phone });
+
         // For prototype, signup just logs you in as a new user
-        await login(email, role);
+        await login(email, role, name);
     };
 
     return (
@@ -39,8 +68,8 @@ export default function SignupPage() {
                                     type="button"
                                     onClick={() => setRole("STUDENT")}
                                     className={`flex items-center justify-center rounded-lg border p-3 text-sm font-medium transition-colors ${role === "STUDENT"
-                                            ? "border-primary bg-primary/10 text-primary"
-                                            : "border-input bg-background text-muted-foreground hover:bg-accent"
+                                        ? "border-primary bg-primary/10 text-primary"
+                                        : "border-input bg-background text-muted-foreground hover:bg-accent"
                                         }`}
                                 >
                                     Student / Parent
@@ -49,8 +78,8 @@ export default function SignupPage() {
                                     type="button"
                                     onClick={() => setRole("ADMIN")}
                                     className={`flex items-center justify-center rounded-lg border p-3 text-sm font-medium transition-colors ${role === "ADMIN"
-                                            ? "border-primary bg-primary/10 text-primary"
-                                            : "border-input bg-background text-muted-foreground hover:bg-accent"
+                                        ? "border-primary bg-primary/10 text-primary"
+                                        : "border-input bg-background text-muted-foreground hover:bg-accent"
                                         }`}
                                 >
                                     School Admin
@@ -91,6 +120,64 @@ export default function SignupPage() {
                                 placeholder="you@example.com"
                             />
                         </div>
+
+                        {role === "STUDENT" && (
+                            <>
+                                <div>
+                                    <label htmlFor="university" className="block text-sm font-medium text-foreground">
+                                        University / School
+                                    </label>
+                                    <select
+                                        id="university"
+                                        name="university"
+                                        required
+                                        value={university}
+                                        onChange={(e) => setUniversity(e.target.value)}
+                                        className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm"
+                                    >
+                                        <option value="">Select University</option>
+                                        {GHANA_UNIVERSITIES.map((uni) => (
+                                            <option key={uni} value={uni}>
+                                                {uni}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label htmlFor="indexNumber" className="block text-sm font-medium text-foreground">
+                                            Index Number
+                                        </label>
+                                        <input
+                                            id="indexNumber"
+                                            name="indexNumber"
+                                            type="text"
+                                            required
+                                            value={indexNumber}
+                                            onChange={(e) => setIndexNumber(e.target.value)}
+                                            className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm"
+                                            placeholder="10293847"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="phone" className="block text-sm font-medium text-foreground">
+                                            Phone Number
+                                        </label>
+                                        <input
+                                            id="phone"
+                                            name="phone"
+                                            type="tel"
+                                            required
+                                            value={phone}
+                                            onChange={(e) => setPhone(e.target.value)}
+                                            className="mt-1 block w-full rounded-lg border border-input bg-background px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm"
+                                            placeholder="024 123 4567"
+                                        />
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     <button

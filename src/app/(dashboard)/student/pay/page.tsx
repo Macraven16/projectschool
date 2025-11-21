@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MOCK_FEES } from "@/lib/mock-data";
-import { CreditCard, Smartphone, CheckCircle2, Loader2 } from "lucide-react";
+import { MOCK_FEES, MOCK_STUDENTS } from "@/lib/mock-data";
+import { CreditCard, Smartphone, CheckCircle2, Loader2, Home } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function PaymentPage() {
+    const router = useRouter();
     const [step, setStep] = useState(1);
     const [selectedFee, setSelectedFee] = useState(MOCK_FEES[0].id);
     const [amount, setAmount] = useState("");
@@ -16,6 +19,12 @@ export default function PaymentPage() {
         setIsLoading(true);
         // Simulate API call
         await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Update mock balance for prototype
+        if (MOCK_STUDENTS[0]) {
+            MOCK_STUDENTS[0].balance = Math.max(0, MOCK_STUDENTS[0].balance - Number(amount));
+        }
+
         setIsLoading(false);
         setStep(3);
     };
@@ -168,12 +177,13 @@ export default function PaymentPage() {
                         <button className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90">
                             Download Receipt
                         </button>
-                        <button
-                            onClick={() => setStep(1)}
-                            className="w-full rounded-lg border border-input bg-background px-4 py-3 text-sm font-semibold shadow-sm hover:bg-accent"
+                        <Link
+                            href="/student"
+                            className="flex w-full items-center justify-center gap-2 rounded-lg border border-input bg-background px-4 py-3 text-sm font-semibold shadow-sm hover:bg-accent"
                         >
-                            Make Another Payment
-                        </button>
+                            <Home className="h-4 w-4" />
+                            Return to Dashboard
+                        </Link>
                     </div>
                 </div>
             )}

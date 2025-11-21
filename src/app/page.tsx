@@ -27,8 +27,8 @@ export default function LandingPage() {
         </div>
       </header>
 
-      <main className="flex-1">
-        <section className="space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
+      <main className="flex-1 flex flex-col items-center justify-center">
+        <section className="w-full space-y-6 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32 flex flex-col items-center justify-center">
           <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center px-4">
             <h1 className="font-bold text-3xl sm:text-5xl md:text-6xl lg:text-7xl bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
               The Future of School Payments
@@ -54,7 +54,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section className="container space-y-6 py-8 md:py-12 lg:py-24 px-4">
+        <section className="container space-y-6 py-8 md:py-12 lg:py-24 px-4 flex flex-col items-center">
           <div className="mx-auto grid justify-center gap-4 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
             <div className="relative overflow-hidden rounded-lg border bg-background p-2">
               <div className="flex h-[180px] flex-col justify-between rounded-md p-6">
