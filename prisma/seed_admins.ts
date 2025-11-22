@@ -37,6 +37,7 @@ async function main() {
     const admins = [
         { email: 'admin@gctu.edu.gh', name: 'GCTU Master Admin' },
         { email: 'admin@raventech.com.gh', name: 'RavenTech Master Admin' },
+        { email: 'nii.admin@raventech.com.gh', name: 'Isaac Nii Hammond' },
     ];
 
     for (const admin of admins) {
@@ -46,6 +47,7 @@ async function main() {
                 name: admin.name,
                 password: hashedPassword,
                 role: 'MASTER_ADMIN',
+                image: admin.email === 'nii.admin@raventech.com.gh' ? '/team/isaac.jpg' : undefined,
             },
         });
         console.log(`Created Master Admin: ${admin.email}`);

@@ -5,36 +5,13 @@ export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-2 font-bold text-xl text-primary">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-              <GraduationCap className="h-5 w-5" />
-            </div>
-            <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">EduPay</span>
-          </div>
-          <nav className="flex gap-4 items-center">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Login
-            </Link>
-            <Link
-              href="/signup"
-              className="rounded-full bg-primary px-6 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-all hover:shadow-lg hover:shadow-primary/20"
-            >
-              Get Started
-            </Link>
-          </nav>
-        </div>
-      </header>
+
 
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative overflow-hidden pt-16 md:pt-24 lg:pt-32 pb-16">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-background to-background" />
-          <div className="container px-4 md:px-6 flex flex-col items-center text-center">
+          <div className="container mx-auto px-4 md:px-6 flex flex-col items-center text-center">
             <div className="inline-flex items-center rounded-full border bg-background/50 px-3 py-1 text-sm font-medium backdrop-blur-sm mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <span className="flex h-2 w-2 rounded-full bg-green-500 mr-2" />
               Trusted by 50+ Universities
@@ -65,7 +42,7 @@ export default function LandingPage() {
         </section>
 
         {/* Features Grid */}
-        <section className="container py-12 md:py-24 lg:py-32 px-4">
+        <section className="container mx-auto py-12 md:py-24 lg:py-32 px-4">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             <div className="group relative overflow-hidden rounded-2xl border bg-background p-8 transition-all hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1">
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
@@ -99,7 +76,7 @@ export default function LandingPage() {
 
         {/* Social Proof / Stats */}
         <section className="border-y bg-muted/50 py-12 md:py-24">
-          <div className="container px-4 md:px-6">
+          <div className="container mx-auto px-4 md:px-6">
             <div className="grid gap-8 md:grid-cols-3 text-center">
               <div className="space-y-2">
                 <h4 className="text-4xl font-bold text-primary">GHS 50M+</h4>
@@ -118,7 +95,7 @@ export default function LandingPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="container py-24 px-4">
+        <section className="container mx-auto py-24 px-4">
           <div className="relative overflow-hidden rounded-3xl bg-primary px-6 py-16 text-center shadow-2xl sm:px-16 md:py-24">
             <div className="relative z-10 max-w-2xl mx-auto space-y-6">
               <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
@@ -149,47 +126,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t bg-background py-12">
-        <div className="container px-4 md:px-6">
-          <div className="grid gap-8 md:grid-cols-4">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 font-bold text-xl text-primary">
-                <GraduationCap className="h-6 w-6" />
-                <span>EduPay</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Empowering education through seamless financial solutions.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground">Features</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Security</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground">About Us</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Careers</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="#" className="hover:text-foreground">Terms of Service</Link></li>
-                <li><Link href="#" className="hover:text-foreground">Privacy Policy</Link></li>
-              </ul>
-            </div>
-          </div>
-          <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} EduPay. All rights reserved.
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 }

@@ -160,18 +160,18 @@ export default function LoginPage() {
                 <div className="absolute inset-0 bg-primary/10" />
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-50 mix-blend-multiply" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                <div className="relative z-10 flex h-full flex-col justify-end p-12 text-foreground">
+                <div className="relative z-10 flex h-full flex-col justify-center p-12 text-foreground">
                     <div className="space-y-4 max-w-lg">
                         <h2 className="text-3xl font-bold leading-tight">
-                            "EduPay has transformed how we manage school fees. It's secure, fast, and incredibly easy to use."
+                            "Education is the most powerful weapon which you can use to change the world."
                         </h2>
                         <div className="flex items-center gap-4">
                             <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                                DK
+                                NM
                             </div>
                             <div>
-                                <p className="font-semibold">Dr. Kwame</p>
-                                <p className="text-sm text-muted-foreground">University Administrator</p>
+                                <p className="font-semibold">Nelson Mandela</p>
+                                <p className="text-sm text-muted-foreground">Former President of South Africa</p>
                             </div>
                         </div>
                     </div>
