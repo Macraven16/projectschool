@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         // }
 
         const body = await request.json();
-        const { email, password, name, role, departmentId, phoneNumber } = body;
+        const { email, password, name, role, departmentId, phoneNumber, schoolId } = body;
 
         if (!email || !password || !name || !role) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -54,6 +54,7 @@ export async function POST(request: Request) {
                 name,
                 role,
                 departmentId: departmentId || null,
+                schoolId: schoolId || null,
                 phoneNumber: phoneNumber || null,
             },
         });

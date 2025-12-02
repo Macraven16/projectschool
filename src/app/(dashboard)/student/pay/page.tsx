@@ -160,6 +160,7 @@ export default function PaymentPage() {
                                 <div className="flex-1">
                                     <p className="font-medium">Mobile Money</p>
                                     <p className="text-xs text-muted-foreground">MTN, Vodafone, AirtelTigo</p>
+                                    <p className="text-xs font-semibold text-primary mt-1">Official Number: 0533767474</p>
                                 </div>
                                 <div className="h-4 w-4 rounded-full border border-primary flex items-center justify-center">
                                     {method === "momo" && <div className="h-2 w-2 rounded-full bg-primary" />}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Search, Filter } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Filter, X } from "lucide-react";
 
 export default function StaffPage() {
     const [staff, setStaff] = useState<any[]>([]);
@@ -12,6 +12,17 @@ export default function StaffPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDepartment, setSelectedDepartment] = useState("");
     const [saving, setSaving] = useState(false);
+
+    // Add Staff State
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [universities, setUniversities] = useState<any[]>([]);
+    const [newStaff, setNewStaff] = useState({
+        name: "",
+        email: "",
+        departmentId: "",
+        schoolId: "",
+        password: "password123"
+    });
 
     useEffect(() => {
         fetchStaff();
@@ -41,6 +52,52 @@ export default function StaffPage() {
             }
         } catch (error) {
             console.error("Failed to fetch departments", error);
+        }
+    };
+
+    const fetchUniversities = async () => {
+        try {
+            const res = await fetch("/api/universities");
+            if (res.ok) {
+                const data = await res.json();
+                setUniversities(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch universities", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUniversities();
+    }, []);
+
+    const handleAddStaff = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+        try {
+            const res = await fetch("/api/users", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...newStaff,
+                    role: "STAFF"
+                }),
+            });
+
+            if (res.ok) {
+                alert("Staff Added Successfully!");
+                setIsAddModalOpen(false);
+                fetchStaff();
+                setNewStaff({ name: "", email: "", departmentId: "", schoolId: "", password: "password123" });
+            } else {
+                const error = await res.json();
+                alert("Failed to add staff: " + error.error);
+            }
+        } catch (error) {
+            console.error("Error adding staff", error);
+            alert("Error adding staff");
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -117,11 +174,83 @@ export default function StaffPage() {
                         />
                     </div>
                 </div>
-                <button className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90">
+                <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
+                >
                     <Plus className="mr-2 h-4 w-4" />
                     Add Staff
                 </button>
             </div>
+
+            {/* Add Staff Modal */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+                    <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl border animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold">Add New Staff</h3>
+                            <button onClick={() => setIsAddModalOpen(false)}><X className="h-5 w-5" /></button>
+                        </div>
+                        <form onSubmit={handleAddStaff} className="space-y-4">
+                            <div>
+                                <label className="text-sm font-medium">Full Name</label>
+                                <input
+                                    type="text"
+                                    value={newStaff.name}
+                                    onChange={(e) => setNewStaff({ ...newStaff, name: e.target.value })}
+                                    className="w-full p-2 border rounded-md"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium">Email</label>
+                                <input
+                                    type="email"
+                                    value={newStaff.email}
+                                    onChange={(e) => setNewStaff({ ...newStaff, email: e.target.value })}
+                                    className="w-full p-2 border rounded-md"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium">Department</label>
+                                <select
+                                    value={newStaff.departmentId}
+                                    onChange={(e) => setNewStaff({ ...newStaff, departmentId: e.target.value })}
+                                    className="w-full p-2 border rounded-md"
+                                    required
+                                >
+                                    <option value="">Select Department</option>
+                                    {departments.map(dept => (
+                                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            {/* School Dropdown - As requested */}
+                            <div>
+                                <label className="text-sm font-medium">School (Optional)</label>
+                                <select
+                                    value={newStaff.schoolId}
+                                    onChange={(e) => setNewStaff({ ...newStaff, schoolId: e.target.value })}
+                                    className="w-full p-2 border rounded-md"
+                                >
+                                    <option value="">Select School</option>
+                                    {universities.map(uni => (
+                                        <option key={uni.id} value={uni.id}>{uni.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={saving}
+                                className="w-full bg-primary text-primary-foreground py-2 rounded-md disabled:opacity-50"
+                            >
+                                {saving ? "Adding..." : "Add Staff"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             <div className="rounded-md border bg-card">
                 <div className="relative w-full overflow-auto">

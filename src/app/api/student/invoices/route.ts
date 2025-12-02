@@ -27,7 +27,12 @@ export async function GET(request: Request) {
         }
 
         const invoices = await prisma.invoice.findMany({
-            where: { studentId: student.id },
+            where: {
+                studentId: student.id,
+                feeStructure: {
+                    schoolId: student.schoolId
+                }
+            },
             include: {
                 feeStructure: true,
             },

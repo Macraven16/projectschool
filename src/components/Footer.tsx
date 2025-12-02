@@ -1,7 +1,23 @@
+"use client";
+
 import Link from "next/link";
 import { GraduationCap } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 export function Footer() {
+    const { user } = useAuth();
+    const currentYear = new Date().getFullYear();
+
+    if (user) {
+        return (
+            <footer className="border-t bg-background py-6">
+                <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+                    © {currentYear} EduPay. All rights reserved.
+                </div>
+            </footer>
+        );
+    }
+
     return (
         <footer className="border-t bg-background py-12">
             <div className="container mx-auto px-4 md:px-6">
@@ -42,7 +58,7 @@ export function Footer() {
                     </div>
                 </div>
                 <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-                    © {new Date().getFullYear()} EduPay. All rights reserved.
+                    © {currentYear} EduPay. All rights reserved.
                 </div>
             </div>
         </footer>

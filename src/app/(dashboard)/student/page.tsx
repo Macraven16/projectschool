@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MOCK_STUDENTS, MOCK_TRANSACTIONS } from "@/lib/mock-data";
 import { useAuth } from "@/lib/auth-context";
 import { RecentActivity } from "@/components/RecentActivity";
 import { ArrowRight, CreditCard, Wallet, PiggyBank, AlertCircle, X } from "lucide-react";
@@ -10,13 +9,57 @@ import Link from "next/link";
 
 export default function StudentDashboard() {
     const { user } = useAuth();
-    // In a real app, we'd fetch the student data based on the logged-in user
-    const student = MOCK_STUDENTS[0];
-    const recentTransactions = MOCK_TRANSACTIONS.slice(0, 3);
+    const [outstandingFees, setOutstandingFees] = useState(0);
+    const [totalPaid, setTotalPaid] = useState(0);
+    const [walletBalance, setWalletBalance] = useState(0);
+    const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
 
     const [showBreakdown, setShowBreakdown] = useState(false);
     const [showTopUp, setShowTopUp] = useState(false);
     const [topUpAmount, setTopUpAmount] = useState("");
+    const [feeBreakdown, setFeeBreakdown] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch Invoices for Outstanding Fees
+                const invoicesRes = await fetch('/api/student/invoices');
+                if (invoicesRes.ok) {
+                    const invoices = await invoicesRes.json();
+                    const pending = invoices.filter((inv: any) => inv.status !== 'COMPLETED');
+                    const totalOutstanding = pending.reduce((sum: number, inv: any) => sum + (inv.feeStructure.amount - inv.amountPaid), 0);
+                    const paid = invoices.reduce((sum: number, inv: any) => sum + inv.amountPaid, 0);
+
+                    setOutstandingFees(totalOutstanding);
+                    setTotalPaid(paid);
+
+                    // Prepare breakdown from pending invoices
+                    const breakdown = pending.map((inv: any) => ({
+                        name: inv.feeStructure.name,
+                        amount: inv.feeStructure.amount - inv.amountPaid,
+                        total: inv.feeStructure.amount,
+                        paid: inv.amountPaid
+                    }));
+                    setFeeBreakdown(breakdown);
+                }
+
+                // Fetch Wallet Data
+                const walletRes = await fetch('/api/wallet');
+                if (walletRes.ok) {
+                    const walletData = await walletRes.json();
+                    setWalletBalance(walletData.balance);
+                    setRecentTransactions(walletData.transactions.slice(0, 3));
+                }
+            } catch (error) {
+                console.error("Failed to fetch dashboard data", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     return (
         <div className="space-y-6 relative">
@@ -31,25 +74,30 @@ export default function StudentDashboard() {
                             </button>
                         </div>
                         <div className="space-y-3">
-                            <div className="flex justify-between py-2 border-b">
-                                <span className="text-muted-foreground">Tuition Fees</span>
-                                <span className="font-medium">GHS 2,500.00</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                                <span className="text-muted-foreground">Facility User Fee</span>
-                                <span className="font-medium">GHS 450.00</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                                <span className="text-muted-foreground">SRC Dues</span>
-                                <span className="font-medium">GHS 100.00</span>
-                            </div>
-                            <div className="flex justify-between py-2 border-b">
-                                <span className="text-muted-foreground">Departmental Dues</span>
-                                <span className="font-medium">GHS 50.00</span>
-                            </div>
+                            {feeBreakdown.length > 0 ? (
+                                feeBreakdown.map((item, index) => (
+                                    <div key={index} className="flex flex-col py-2 border-b">
+                                        <div className="flex justify-between">
+                                            <span className="text-muted-foreground">{item.name}</span>
+                                            <span className="font-medium">GHS {item.amount.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                                            <span>Total: {item.total.toLocaleString()}</span>
+                                            <span>Paid: {item.paid.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-center text-muted-foreground py-4">No outstanding fees.</p>
+                            )}
+
                             <div className="flex justify-between py-2 pt-4">
+                                <span className="font-bold">Total Paid</span>
+                                <span className="font-bold text-green-600">GHS {totalPaid.toLocaleString()}</span>
+                            </div>
+                            <div className="flex justify-between py-2">
                                 <span className="font-bold">Total Due</span>
-                                <span className="font-bold text-primary">GHS {student.balance.toLocaleString()}</span>
+                                <span className="font-bold text-primary">GHS {outstandingFees.toLocaleString()}</span>
                             </div>
                         </div>
                         <button
@@ -95,11 +143,33 @@ export default function StudentDashboard() {
                                 ))}
                             </div>
                             <button
-                                onClick={() => {
-                                    // Mock top up logic
-                                    alert(`Successfully topped up GHS ${topUpAmount}`);
-                                    setShowTopUp(false);
-                                    setTopUpAmount("");
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetch('/api/wallet', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ amount: topUpAmount })
+                                        });
+
+                                        if (res.ok) {
+                                            const data = await res.json();
+                                            setWalletBalance(data.balance);
+                                            alert(`Successfully topped up GHS ${topUpAmount}`);
+                                            setShowTopUp(false);
+                                            setTopUpAmount("");
+                                            // Refresh transactions
+                                            const walletRes = await fetch('/api/wallet');
+                                            if (walletRes.ok) {
+                                                const walletData = await walletRes.json();
+                                                setRecentTransactions(walletData.transactions.slice(0, 3));
+                                            }
+                                        } else {
+                                            alert('Top-up failed');
+                                        }
+                                    } catch (error) {
+                                        console.error('Top-up error:', error);
+                                        alert('An error occurred during top-up');
+                                    }
                                 }}
                                 className="w-full mt-2 bg-primary text-primary-foreground py-2 rounded-lg font-medium hover:opacity-90"
                             >
@@ -111,8 +181,18 @@ export default function StudentDashboard() {
             )}
 
             <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-bold tracking-tight">Hi, {user?.name || "Student"} 👋</h1>
-                <p className="text-muted-foreground">Here's your financial overview for this term.</p>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">Hi, {user?.name || "Student"} 👋</h1>
+                        <p className="text-muted-foreground">Here's your financial overview for this term.</p>
+                    </div>
+                    {user?.student?.studentIdNumber && (
+                        <div className="bg-muted/50 px-3 py-1 rounded-md border">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Index Number</p>
+                            <p className="text-sm font-mono font-medium">{user.student.studentIdNumber}</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Balance Card */}
@@ -125,7 +205,9 @@ export default function StudentDashboard() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">GHS {student.balance.toLocaleString()}</div>
+                        <div className="text-3xl font-bold">
+                            {loading ? "..." : `GHS ${outstandingFees.toLocaleString()}`}
+                        </div>
                         <p className="text-xs text-primary-foreground/70 mt-1">
                             Due by Jan 15, 2025
                         </p>
@@ -152,7 +234,9 @@ export default function StudentDashboard() {
                         <Wallet className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">GHS 120.50</div>
+                        <div className="text-3xl font-bold">
+                            {loading ? "..." : `GHS ${walletBalance.toLocaleString()}`}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">
                             Available for spending
                         </p>
@@ -212,7 +296,7 @@ export default function StudentDashboard() {
             </div>
 
             {/* Recent Transactions */}
-            <RecentActivity />
+            <RecentActivity transactions={recentTransactions} />
         </div>
     );
 }

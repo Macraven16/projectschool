@@ -64,38 +64,32 @@ export default function LoginPage() {
                                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                     I am a...
                                 </label>
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-2 gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setRole("STUDENT")}
-                                        className={`flex items-center justify-center rounded-lg border p-3 text-sm font-medium transition-all duration-200 ${role === "STUDENT"
-                                            ? "border-primary bg-primary/10 text-primary ring-2 ring-primary/20"
-                                            : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                                        className={`flex flex-col items-center justify-center rounded-xl border p-4 text-sm font-medium transition-all duration-200 hover:shadow-md ${role === "STUDENT"
+                                            ? "border-primary bg-primary/5 text-primary ring-2 ring-primary/20 shadow-sm"
+                                            : "border-input bg-background hover:bg-accent hover:text-accent-foreground text-muted-foreground"
                                             }`}
                                     >
+                                        <GraduationCap className="mb-2 h-6 w-6" />
                                         Student
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setRole("ADMIN")}
-                                        className={`flex items-center justify-center rounded-lg border p-3 text-sm font-medium transition-all duration-200 ${role === "ADMIN"
-                                            ? "border-primary bg-primary/10 text-primary ring-2 ring-primary/20"
-                                            : "border-input bg-background hover:bg-accent hover:text-accent-foreground"
+                                        className={`flex flex-col items-center justify-center rounded-xl border p-4 text-sm font-medium transition-all duration-200 hover:shadow-md ${role === "ADMIN" || role === "MASTER_ADMIN"
+                                            ? "border-primary bg-primary/5 text-primary ring-2 ring-primary/20 shadow-sm"
+                                            : "border-input bg-background hover:bg-accent hover:text-accent-foreground text-muted-foreground"
                                             }`}
                                     >
-                                        Admin
+                                        <div className="mb-2 h-6 w-6 rounded-full border-2 border-current flex items-center justify-center text-[10px] font-bold">
+                                            A
+                                        </div>
+                                        Institution Admin
                                     </button>
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setRole("MASTER_ADMIN")}
-                                    className={`flex w-full items-center justify-center rounded-lg border p-2 text-xs font-medium transition-all duration-200 ${role === "MASTER_ADMIN"
-                                        ? "border-primary bg-primary/10 text-primary ring-2 ring-primary/20"
-                                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground text-muted-foreground"
-                                        }`}
-                                >
-                                    Master Admin Login
-                                </button>
                             </div>
 
                             <div className="space-y-2">
@@ -105,7 +99,7 @@ export default function LoginPage() {
                                 <input
                                     id="email"
                                     type="email"
-                                    placeholder="name@example.com"
+                                    placeholder={role === "STUDENT" ? "student@university.edu.gh" : "admin@university.edu.gh"}
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}

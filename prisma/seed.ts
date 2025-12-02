@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
@@ -28,11 +28,19 @@ async function main() {
     ];
 
     for (const uni of universities) {
+        // Extract code from name (e.g., "University (GCTU)" -> "GCTU") or use first 4 chars
+        const match = uni.name.match(/\(([^)]+)\)/);
+        let code = match ? match[1] : uni.name.substring(0, 4).toUpperCase();
+
+        // Ensure code is unique-ish (simple approach for seed)
+        if (code.length < 2) code = uni.name.substring(0, 3).toUpperCase();
+
         await prisma.university.upsert({
-            where: { id: uni.name.replace(/\s+/g, '_').toLowerCase() }, // Using a deterministic ID for upsert if possible, but here we rely on create mostly or findFirst
+            where: { name: uni.name }, // Use name as unique identifier for upsert
             update: {},
             create: {
                 name: uni.name,
+                code: code,
                 verified: uni.verified,
                 logo: '/logos/default.png',
                 contactEmail: 'info@' + uni.name.split(' ')[0].toLowerCase() + '.edu.gh',

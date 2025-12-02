@@ -34,27 +34,33 @@ export async function POST(request: Request) {
 
         // If Student, create Student profile and Wallet
         if (user.role === 'STUDENT') {
-            // Find school ID by name (assuming university name is passed)
+            // Find school ID by name or create if not exists
             let schoolId = '';
 
             if (university) {
-                const school = await prisma.university.findFirst({
-                    where: { name: university },
+                let school = await prisma.university.findFirst({
+                    where: { name: { equals: university, mode: 'insensitive' } },
                 });
-                if (school) schoolId = school.id;
+
+                if (!school) {
+                    // Create new university if it doesn't exist (handling "Other" case)
+                    // Generate a simple code based on name
+                    const code = university.substring(0, 4).toUpperCase() + Math.floor(Math.random() * 1000);
+                    school = await prisma.university.create({
+                        data: {
+                            name: university,
+                            code: code,
+                            verified: false // New schools are unverified by default
+                        }
+                    });
+                }
+                schoolId = school.id;
             }
 
-            // Fallback to first university if no specific one found (for demo purposes)
+            // Fallback to first university if no specific one found (should be rare now)
             if (!schoolId) {
                 const firstSchool = await prisma.university.findFirst();
                 if (firstSchool) schoolId = firstSchool.id;
-            }
-
-            if (!schoolId) {
-                // If still no school, we can't create a student properly without a school
-                // But we created the user. We should probably delete the user or return error before creating user.
-                // For now, let's assume seeds are run.
-                console.error("No university found for student signup");
             }
 
             if (schoolId) {
@@ -65,6 +71,8 @@ export async function POST(request: Request) {
                         studentIdNumber: indexNumber || `ID-${Date.now()}`,
                         grade: grade || 'Level 100',
                         campus: campus || 'Main Campus',
+                        department: body.department,
+                        course: body.course,
                         wallet: {
                             create: {
                                 balance: 0.0,

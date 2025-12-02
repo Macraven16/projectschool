@@ -14,12 +14,18 @@ interface Transaction {
     description?: string;
 }
 
-export function RecentActivity() {
+export function RecentActivity({ transactions: propTransactions }: { transactions?: Transaction[] }) {
     const { user } = useAuth();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        if (propTransactions) {
+            setTransactions(propTransactions);
+            setIsLoading(false);
+            return;
+        }
+
         if (user?.student?.id) {
             fetch(`/api/transactions?studentId=${user.student.id}`)
                 .then(res => res.json())
@@ -30,8 +36,10 @@ export function RecentActivity() {
                 })
                 .catch(err => console.error("Failed to fetch transactions", err))
                 .finally(() => setIsLoading(false));
+        } else {
+            setIsLoading(false);
         }
-    }, [user]);
+    }, [user, propTransactions]);
 
     if (isLoading) return <div className="text-sm text-muted-foreground">Loading activity...</div>;
 

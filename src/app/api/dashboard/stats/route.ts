@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
     try {
-        const [totalUsers, totalStudents, totalStaff, recentUsers, transactions] = await prisma.$transaction([
+        const [totalUsers, totalStudents, totalStaff, recentUsers, transactions, invoices] = await prisma.$transaction([
             prisma.user.count(),
             prisma.user.count({ where: { role: 'STUDENT' } }),
             prisma.user.count({ where: { role: 'STAFF' } }),
@@ -15,17 +15,28 @@ export async function GET() {
             prisma.transaction.findMany({
                 where: { status: 'COMPLETED' },
                 select: { amount: true }
+            }),
+            prisma.invoice.findMany({
+                where: { status: { not: 'COMPLETED' } },
+                select: {
+                    amountPaid: true,
+                    feeStructure: {
+                        select: { amount: true }
+                    }
+                }
             })
         ]);
 
         const totalRevenue = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+        const outstandingFees = invoices.reduce((sum, inv) => sum + (inv.feeStructure.amount - inv.amountPaid), 0);
 
         return NextResponse.json({
             totalUsers,
             totalStudents,
             totalStaff,
             recentUsers,
-            totalRevenue
+            totalRevenue,
+            outstandingFees
         });
     } catch (error) {
         console.error('Dashboard stats error:', error);

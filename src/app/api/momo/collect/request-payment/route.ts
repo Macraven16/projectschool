@@ -68,7 +68,7 @@ export async function POST(request: Request) {
                 externalId: referenceId,
                 payer,
                 payerMessage: payerMessage || 'Payment',
-                payeeNote: payeeNote || 'Payment',
+                payeeNote: payeeNote || 'Payment to 0533767474',
             },
             {
                 'X-Reference-Id': referenceId,

@@ -31,6 +31,8 @@ model User {
   notifications Notification[]
   student       Student?
   department    Department?    @relation(fields: [departmentId], references: [id])
+  schoolId      String?
+  school        University?    @relation(fields: [schoolId], references: [id])
 }
 
 model University {
@@ -47,15 +49,18 @@ model University {
   courses       Course[]
   feeStructures FeeStructure[]
   students      Student[]
+  users         User[]
 }
 
 model Student {
   id              String     @id @default(cuid())
   userId          String     @unique
   schoolId        String
-  studentIdNumber String
+  studentIdNumber String     @unique
   grade           String
   campus          String?
+  department      String?
+  course          String?
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   budgets         Budget[]
@@ -100,7 +105,7 @@ model Transaction {
   balanceBefore Float             @default(0.0)
   balanceAfter  Float             @default(0.0)
   date          DateTime          @default(now())
-  wallet        Wallet            @relation(fields: [walletId], references: [id])
+  wallet        Wallet            @relation(fields: [walletId], references: [id], onDelete: Cascade)
 }
 
 model FeeStructure {
@@ -125,7 +130,7 @@ model Invoice {
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   feeStructure   FeeStructure @relation(fields: [feeStructureId], references: [id])
-  student        Student      @relation(fields: [studentId], references: [id])
+  student        Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
 model Notification {

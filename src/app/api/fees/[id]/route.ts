@@ -28,6 +28,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     try {
         const { id } = await params;
+
+        // Delete linked invoices first
+        await prisma.invoice.deleteMany({
+            where: { feeStructureId: id }
+        });
+
         await prisma.feeStructure.delete({
             where: { id },
         });

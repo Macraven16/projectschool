@@ -65,6 +65,9 @@ export async function POST(request: Request) {
         return response;
     } catch (error) {
         console.error('Login error:', error);
+        // Debug logging to file
+        const fs = require('fs');
+        fs.appendFileSync('login-error.log', `${new Date().toISOString()} - ${error}\n${JSON.stringify(error, null, 2)}\n`);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

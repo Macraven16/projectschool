@@ -25,7 +25,9 @@ export default function StudentsPage() {
         grade: "",
         schoolId: "",
         campus: "",
-        phoneNumber: ""
+        phoneNumber: "",
+        department: "",
+        course: ""
     });
 
     useEffect(() => {
@@ -50,7 +52,9 @@ export default function StudentsPage() {
                     schoolName: s.school?.name,
                     schoolId: s.schoolId,
                     campus: s.campus,
-                    phoneNumber: s.user?.phoneNumber || ""
+                    phoneNumber: s.user?.phoneNumber || "",
+                    department: s.department,
+                    course: s.course
                 }));
                 setStudents(formatted);
             }
@@ -73,26 +77,67 @@ export default function StudentsPage() {
         }
     };
 
-    const filteredStudents = students.filter(student =>
-        student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.studentIdNumber?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const [filterSchool, setFilterSchool] = useState("");
+    const [filterGrade, setFilterGrade] = useState("");
+
+    const filteredStudents = students.filter(student => {
+        const matchesSearch = student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            student.studentIdNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesSchool = filterSchool ? student.schoolId === filterSchool : true;
+        const matchesGrade = filterGrade ? student.grade === filterGrade : true;
+        return matchesSearch && matchesSchool && matchesGrade;
+    });
+
+    const handleExportCSV = () => {
+        const headers = ["Student ID", "Name", "Email", "School", "Grade", "Balance", "Status"];
+        const csvContent = [
+            headers.join(","),
+            ...filteredStudents.map(s => [
+                s.studentIdNumber,
+                `"${s.name}"`,
+                s.email,
+                `"${s.schoolName}"`,
+                s.grade,
+                s.balance,
+                "Active"
+            ].join(","))
+        ].join("\n");
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "students_export.csv");
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const [customSchoolName, setCustomSchoolName] = useState("");
 
     const handleAddStudent = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
+            const payload = { ...newStudent };
+            if (newStudent.schoolId === "other") {
+                // @ts-ignore
+                payload.schoolName = customSchoolName;
+            }
+
             const res = await fetch("/api/students", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newStudent),
+                body: JSON.stringify(payload),
             });
 
             if (res.ok) {
                 alert("Student Added Successfully!");
                 setShowAddModal(false);
                 fetchStudents();
-                setNewStudent({ name: "", email: "", password: "password123", studentIdNumber: "", grade: "", schoolId: "", campus: "", phoneNumber: "" });
+                setNewStudent({ name: "", email: "", password: "password123", studentIdNumber: "", grade: "", schoolId: "", campus: "", phoneNumber: "", department: "", course: "" });
+                setCustomSchoolName("");
             } else {
                 const error = await res.json();
                 alert("Failed to add student: " + error.error);
@@ -114,7 +159,9 @@ export default function StudentsPage() {
             grade: student.grade,
             schoolId: student.schoolId,
             campus: student.campus || "",
-            phoneNumber: student.phoneNumber || ""
+            phoneNumber: student.phoneNumber || "",
+            department: student.department || "",
+            course: student.course || ""
         });
         setShowEditModal(true);
     };
@@ -159,6 +206,24 @@ export default function StudentsPage() {
                 }
             } catch (error) {
                 console.error("Error deleting student", error);
+            }
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedStudents.length === 0) return;
+        if (confirm(`Are you sure you want to delete ${selectedStudents.length} students?`)) {
+            try {
+                // Execute deletes in parallel
+                await Promise.all(selectedStudents.map(id =>
+                    fetch(`/api/students/${id}`, { method: "DELETE" })
+                ));
+                setStudents(students.filter(s => !selectedStudents.includes(s.id)));
+                setSelectedStudents([]);
+                alert("Selected students deleted successfully.");
+            } catch (error) {
+                console.error("Error deleting students", error);
+                alert("Failed to delete some students.");
             }
         }
     };
@@ -255,8 +320,21 @@ export default function StudentsPage() {
                                     {universities.map(uni => (
                                         <option key={uni.id} value={uni.id}>{uni.name}</option>
                                     ))}
+                                    <option value="other">Other</option>
                                 </select>
                             </div>
+                            {newStudent.schoolId === "other" && (
+                                <div>
+                                    <label className="text-sm font-medium">Enter School Name</label>
+                                    <input
+                                        type="text"
+                                        value={customSchoolName}
+                                        onChange={(e) => setCustomSchoolName(e.target.value)}
+                                        className="w-full p-2 border rounded-md"
+                                        required
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <label className="text-sm font-medium">Grade/Level</label>
                                 <input
@@ -265,6 +343,28 @@ export default function StudentsPage() {
                                     onChange={(e) => setNewStudent({ ...newStudent, grade: e.target.value })}
                                     className="w-full p-2 border rounded-md"
                                     placeholder="e.g. Level 100"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium">Department</label>
+                                <input
+                                    type="text"
+                                    value={newStudent.department}
+                                    onChange={(e) => setNewStudent({ ...newStudent, department: e.target.value })}
+                                    className="w-full p-2 border rounded-md"
+                                    placeholder="Department"
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium">Course</label>
+                                <input
+                                    type="text"
+                                    value={newStudent.course}
+                                    onChange={(e) => setNewStudent({ ...newStudent, course: e.target.value })}
+                                    className="w-full p-2 border rounded-md"
+                                    placeholder="Course"
                                     required
                                 />
                             </div>
@@ -365,6 +465,26 @@ export default function StudentsPage() {
                                 />
                             </div>
                             <div>
+                                <label className="text-sm font-medium">Department</label>
+                                <input
+                                    type="text"
+                                    value={editingStudent.department || ""}
+                                    onChange={(e) => setEditingStudent({ ...editingStudent, department: e.target.value })}
+                                    className="w-full p-2 border rounded-md"
+                                    placeholder="Department"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium">Course</label>
+                                <input
+                                    type="text"
+                                    value={editingStudent.course || ""}
+                                    onChange={(e) => setEditingStudent({ ...editingStudent, course: e.target.value })}
+                                    className="w-full p-2 border rounded-md"
+                                    placeholder="Course"
+                                />
+                            </div>
+                            <div>
                                 <label className="text-sm font-medium">Campus</label>
                                 <input
                                     type="text"
@@ -406,23 +526,44 @@ export default function StudentsPage() {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between py-4">
-                <div className="relative w-full max-w-sm">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <input
-                        type="search"
-                        placeholder="Search students..."
-                        className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+            <div className="flex flex-col md:flex-row gap-4 items-center justify-between py-4 bg-muted/20 p-4 rounded-lg border">
+                <div className="flex gap-2 w-full md:w-auto">
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <input
+                            type="search"
+                            placeholder="Search students..."
+                            className="w-full rounded-md border border-input bg-background pl-8 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <button className="p-2 border rounded-md hover:bg-muted" title="Print List">
-                        <Printer className="h-4 w-4" />
-                    </button>
-                    <button className="p-2 border rounded-md hover:bg-muted" title="Export CSV">
+                <div className="flex gap-2 w-full md:w-auto overflow-x-auto">
+                    <select
+                        value={filterSchool}
+                        onChange={(e) => setFilterSchool(e.target.value)}
+                        className="p-2 border rounded-md text-sm bg-background"
+                    >
+                        <option value="">All Schools</option>
+                        {universities.map(uni => (
+                            <option key={uni.id} value={uni.id}>{uni.name}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={filterGrade}
+                        onChange={(e) => setFilterGrade(e.target.value)}
+                        className="p-2 border rounded-md text-sm bg-background"
+                    >
+                        <option value="">All Grades</option>
+                        <option value="Level 100">Level 100</option>
+                        <option value="Level 200">Level 200</option>
+                        <option value="Level 300">Level 300</option>
+                        <option value="Level 400">Level 400</option>
+                    </select>
+                    <button onClick={handleExportCSV} className="p-2 border rounded-md hover:bg-muted flex items-center gap-2 text-sm" title="Export CSV">
                         <Download className="h-4 w-4" />
+                        <span className="hidden sm:inline">Export</span>
                     </button>
                 </div>
             </div>
@@ -440,12 +581,28 @@ export default function StudentsPage() {
                                         }
                                     </button>
                                 </th>
-                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student ID</th>
-                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
-                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Grade</th>
-                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Outstanding Balance</th>
-                                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
-                                <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                                {selectedStudents.length > 0 ? (
+                                    <th colSpan={6} className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">
+                                        <div className="flex items-center justify-between w-full">
+                                            <span>{selectedStudents.length} selected</span>
+                                            <button
+                                                onClick={handleBulkDelete}
+                                                className="text-destructive hover:text-destructive/80 flex items-center gap-1 text-xs px-3 py-1 border border-destructive/20 rounded-md bg-destructive/10"
+                                            >
+                                                <Trash2 className="h-3 w-3" /> Delete Selected
+                                            </button>
+                                        </div>
+                                    </th>
+                                ) : (
+                                    <>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Student ID</th>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Name</th>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Grade</th>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Outstanding Balance</th>
+                                        <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                                        <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                                    </>
+                                )}
                             </tr>
                         </thead>
                         <tbody className="[&_tr:last-child]:border-0">

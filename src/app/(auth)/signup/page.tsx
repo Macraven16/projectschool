@@ -41,6 +41,8 @@ export default function SignupPage() {
     const [university, setUniversity] = useState("");
     const [indexNumber, setIndexNumber] = useState("");
     const [phone, setPhone] = useState("");
+    const [department, setDepartment] = useState("");
+    const [course, setCourse] = useState("");
     const [universities, setUniversities] = useState<string[]>([]);
 
     const [customUniversity, setCustomUniversity] = useState("");
@@ -53,6 +55,9 @@ export default function SignupPage() {
                 if (Array.isArray(data)) {
                     // Remove duplicates from API if any
                     const uniqueUniversities = Array.from(new Set(data.map((u: any) => u.name)));
+                    if (!uniqueUniversities.includes("Other")) {
+                        uniqueUniversities.push("Other");
+                    }
                     setUniversities(uniqueUniversities as string[]);
                 }
             })
@@ -72,8 +77,13 @@ export default function SignupPage() {
 
         const finalUniversity = university === "Other" ? customUniversity : university;
 
-        if (role === "STUDENT" && !finalUniversity) {
+        if (!finalUniversity) {
             setError("Please select or enter your university");
+            setLoading(false);
+            return;
+        }
+        if (!department || !course) {
+            setError("Please enter your Department and Course");
             setLoading(false);
             return;
         }
@@ -89,7 +99,9 @@ export default function SignupPage() {
                     role,
                     university: finalUniversity,
                     indexNumber,
-                    phone
+                    phone,
+                    department,
+                    course
                 }),
             });
 
@@ -142,33 +154,8 @@ export default function SignupPage() {
                         </div>
                     )}
                     <div className="space-y-4">
-                        <div>
-                            <label htmlFor="role" className="block text-sm font-medium text-foreground">
-                                I am a...
-                            </label>
-                            <div className="mt-1 grid grid-cols-2 gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setRole("STUDENT")}
-                                    className={`flex items-center justify-center rounded-lg border p-3 text-sm font-medium transition-all duration-200 ${role === "STUDENT"
-                                        ? "border-primary bg-primary/10 text-primary shadow-sm"
-                                        : "border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                        }`}
-                                >
-                                    Student / Parent
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setRole("ADMIN")}
-                                    className={`flex items-center justify-center rounded-lg border p-3 text-sm font-medium transition-all duration-200 ${role === "ADMIN"
-                                        ? "border-primary bg-primary/10 text-primary shadow-sm"
-                                        : "border-input bg-background/50 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                                        }`}
-                                >
-                                    School Admin
-                                </button>
-                            </div>
-                        </div>
+                        {/* Role selection removed as per request - defaulting to STUDENT */}
+                        <input type="hidden" name="role" value="STUDENT" />
 
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-foreground">
@@ -200,7 +187,7 @@ export default function SignupPage() {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
-                                placeholder="you@example.com"
+                                placeholder="student@university.edu.gh"
                             />
                         </div>
 
@@ -230,81 +217,113 @@ export default function SignupPage() {
                             </div>
                         </div>
 
-                        {role === "STUDENT" && (
-                            <>
+                        {/* Student Fields */}
+                        <>
+                            <div>
+                                <label htmlFor="university" className="block text-sm font-medium text-foreground">
+                                    University / School
+                                </label>
+                                <select
+                                    id="university"
+                                    name="university"
+                                    required
+                                    value={university}
+                                    onChange={(e) => setUniversity(e.target.value)}
+                                    className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
+                                >
+                                    <option value="">Select University</option>
+                                    {(universities.length > 0 ? universities : GHANA_UNIVERSITIES).map((uni) => (
+                                        <option key={uni} value={uni}>
+                                            {uni}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {university === "Other" && (
                                 <div>
-                                    <label htmlFor="university" className="block text-sm font-medium text-foreground">
-                                        University / School
+                                    <label htmlFor="customUniversity" className="block text-sm font-medium text-foreground">
+                                        Enter School Name
                                     </label>
-                                    <select
-                                        id="university"
-                                        name="university"
+                                    <input
+                                        id="customUniversity"
+                                        name="customUniversity"
+                                        type="text"
                                         required
-                                        value={university}
-                                        onChange={(e) => setUniversity(e.target.value)}
+                                        value={customUniversity}
+                                        onChange={(e) => setCustomUniversity(e.target.value)}
                                         className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
-                                    >
-                                        <option value="">Select University</option>
-                                        {(universities.length > 0 ? universities : GHANA_UNIVERSITIES).map((uni) => (
-                                            <option key={uni} value={uni}>
-                                                {uni}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        placeholder="Enter your school name"
+                                    />
                                 </div>
+                            )}
 
-                                {university === "Other" && (
-                                    <div>
-                                        <label htmlFor="customUniversity" className="block text-sm font-medium text-foreground">
-                                            Enter School Name
-                                        </label>
-                                        <input
-                                            id="customUniversity"
-                                            name="customUniversity"
-                                            type="text"
-                                            required
-                                            value={customUniversity}
-                                            onChange={(e) => setCustomUniversity(e.target.value)}
-                                            className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
-                                            placeholder="Enter your school name"
-                                        />
-                                    </div>
-                                )}
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label htmlFor="indexNumber" className="block text-sm font-medium text-foreground">
-                                            Index Number
-                                        </label>
-                                        <input
-                                            id="indexNumber"
-                                            name="indexNumber"
-                                            type="text"
-                                            required
-                                            value={indexNumber}
-                                            onChange={(e) => setIndexNumber(e.target.value)}
-                                            className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
-                                            placeholder="10293847"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label htmlFor="phone" className="block text-sm font-medium text-foreground">
-                                            Phone Number
-                                        </label>
-                                        <input
-                                            id="phone"
-                                            name="phone"
-                                            type="tel"
-                                            required
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
-                                            className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
-                                            placeholder="024 123 4567"
-                                        />
-                                    </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="indexNumber" className="block text-sm font-medium text-foreground">
+                                        Index Number
+                                    </label>
+                                    <input
+                                        id="indexNumber"
+                                        name="indexNumber"
+                                        type="text"
+                                        required
+                                        value={indexNumber}
+                                        onChange={(e) => setIndexNumber(e.target.value)}
+                                        className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
+                                        placeholder="10293847"
+                                    />
                                 </div>
-                            </>
-                        )}
+                                <div>
+                                    <label htmlFor="phone" className="block text-sm font-medium text-foreground">
+                                        Phone Number
+                                    </label>
+                                    <input
+                                        id="phone"
+                                        name="phone"
+                                        type="tel"
+                                        required
+                                        value={phone}
+                                        onChange={(e) => setPhone(e.target.value)}
+                                        className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
+                                        placeholder="024 123 4567"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="department" className="block text-sm font-medium text-foreground">
+                                        Department
+                                    </label>
+                                    <input
+                                        id="department"
+                                        name="department"
+                                        type="text"
+                                        required
+                                        value={department}
+                                        onChange={(e) => setDepartment(e.target.value)}
+                                        className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
+                                        placeholder="Computer Science"
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="course" className="block text-sm font-medium text-foreground">
+                                        Course
+                                    </label>
+                                    <input
+                                        id="course"
+                                        name="course"
+                                        type="text"
+                                        required
+                                        value={course}
+                                        onChange={(e) => setCourse(e.target.value)}
+                                        className="mt-1 block w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:text-sm transition-colors"
+                                        placeholder="BSc. IT"
+                                    />
+                                </div>
+                            </div>
+                        </>
                     </div>
 
                     <button
