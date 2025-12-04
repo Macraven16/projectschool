@@ -33,6 +33,7 @@ model User {
   department    Department?    @relation(fields: [departmentId], references: [id])
   schoolId      String?
   school        University?    @relation(fields: [schoolId], references: [id])
+  deletionRequests DeletionRequest[]
 }
 
 model University {
@@ -69,6 +70,7 @@ model Student {
   school          University @relation(fields: [schoolId], references: [id])
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   wallet          Wallet?
+  deletionRequests DeletionRequest[]
 }
 
 model Course {
@@ -201,4 +203,22 @@ enum PaymentMethod {
   CARD
   BANK
   WALLET
+}
+
+model DeletionRequest {
+  id        String                @id @default(cuid())
+  studentId String
+  staffId   String
+  reason    String
+  status    DeletionRequestStatus @default(PENDING)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  student   Student               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  staff     User                  @relation(fields: [staffId], references: [id])
+}
+
+enum DeletionRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

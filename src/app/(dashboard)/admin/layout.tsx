@@ -16,10 +16,13 @@ import {
     GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { SystemStatus } from "@/components/SystemStatus";
+import { DateTimeDisplay } from "@/components/DateTimeDisplay";
 
 const sidebarItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
-    { icon: Users, label: "Users", href: "/admin/users/students" },
+    { icon: Users, label: "Users", href: "/admin/users" },
     { icon: CreditCard, label: "Fees & Payments", href: "/admin/fees" },
     { icon: FileText, label: "Reports", href: "/admin/reports" },
     { icon: Settings, label: "Settings", href: "/admin/settings" },
@@ -48,9 +51,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 )}
             >
                 <div className="flex h-16 items-center border-b px-6">
-                    <Link href="/admin" className="flex items-center gap-2 font-bold text-xl text-primary">
-                        <GraduationCap className="h-6 w-6" />
-                        <span>EduPay Admin</span>
+                    <Link href="/admin" className="flex items-center gap-2 font-bold text-xl">
+                        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                            <GraduationCap className="h-5 w-5" />
+                        </div>
+                        <span className="text-foreground">Edu<span className="text-blue-600">Pay</span></span>
                     </Link>
                 </div>
 
@@ -103,6 +108,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                     </button>
                     <div className="flex items-center gap-4 ml-auto">
+                        <div className="hidden md:flex items-center gap-3 mr-4 border-r pr-4">
+                            <SystemStatus />
+                            <DateTimeDisplay />
+                        </div>
+                        <ThemeToggle /> {/* Added ThemeToggle here */}
                         <div className="relative group">
                             <button className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold hover:bg-primary/30 transition-colors">
                                 {user?.name?.[0] || "A"}

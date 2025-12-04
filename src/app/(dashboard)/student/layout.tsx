@@ -50,7 +50,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
             <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-card px-4 shadow-sm md:px-6">
                 <Link href="/student" className="flex items-center gap-2 font-bold text-lg text-primary hover:opacity-80 transition-opacity">
                     <GraduationCap className="h-6 w-6" />
-                    <span className="hidden md:inline">EduPay Student</span>
+                    <span className="hidden md:inline">Student</span>
                 </Link>
                 <div className="flex items-center gap-4">
                     {/* Notifications */}

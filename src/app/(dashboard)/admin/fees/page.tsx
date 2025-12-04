@@ -35,7 +35,9 @@ export default function FeesPage() {
 
     const fetchFees = async () => {
         try {
-            const res = await fetch("/api/fees");
+            const res = await fetch("/api/admin/fees", {
+                headers: { "Authorization": `Bearer ${localStorage.getItem("school_fintech_token")}` }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setFees(data);
@@ -80,14 +82,17 @@ export default function FeesPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const isEditing = !!editingFee;
-        const url = isEditing ? `/api/fees/${editingFee.id}` : "/api/fees";
+        const url = isEditing ? `/api/admin/fees/${editingFee.id}` : "/api/admin/fees";
         const method = isEditing ? "PUT" : "POST";
         const body = isEditing ? editingFee : newFee;
 
         try {
             const res = await fetch(url, {
                 method,
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem("school_fintech_token")}`
+                },
                 body: JSON.stringify(body),
             });
 

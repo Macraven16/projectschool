@@ -23,8 +23,11 @@ export default function StudentDashboard() {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const token = localStorage.getItem("school_fintech_token");
+                const headers: HeadersInit = token ? { "Authorization": `Bearer ${token}` } : {};
+
                 // Fetch Invoices for Outstanding Fees
-                const invoicesRes = await fetch('/api/student/invoices');
+                const invoicesRes = await fetch('/api/student/invoices', { headers });
                 if (invoicesRes.ok) {
                     const invoices = await invoicesRes.json();
                     const pending = invoices.filter((inv: any) => inv.status !== 'COMPLETED');
@@ -45,7 +48,7 @@ export default function StudentDashboard() {
                 }
 
                 // Fetch Wallet Data
-                const walletRes = await fetch('/api/wallet');
+                const walletRes = await fetch('/api/wallet', { headers });
                 if (walletRes.ok) {
                     const walletData = await walletRes.json();
                     setWalletBalance(walletData.balance);

@@ -64,6 +64,12 @@ export async function POST(request: Request) {
             }
 
             if (schoolId) {
+                // Update User with schoolId
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { schoolId: schoolId }
+                });
+
                 await prisma.student.create({
                     data: {
                         userId: user.id,

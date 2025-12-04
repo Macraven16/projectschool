@@ -4,8 +4,14 @@ import { getUserIdFromRequest } from '@/lib/auth';
 
 export async function GET(request: any) {
     try {
+        console.log("Profile API hit");
         const userId = getUserIdFromRequest(request);
-        if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        console.log("User ID from token:", userId);
+
+        if (!userId) {
+            console.log("Unauthorized: No user ID found");
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
 
         const student = await prisma.student.findUnique({
             where: { userId },
@@ -18,10 +24,15 @@ export async function GET(request: any) {
             },
         });
 
-        if (!student) return NextResponse.json({ error: 'Student profile not found' }, { status: 404 });
+        if (!student) {
+            console.log("Student profile not found for userId:", userId);
+            return NextResponse.json({ error: 'Student profile not found' }, { status: 404 });
+        }
 
+        console.log("Student profile found:", student.id);
         return NextResponse.json(student);
     } catch (error) {
+        console.error("Profile API Error:", error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

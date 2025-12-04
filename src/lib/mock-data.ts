@@ -4,6 +4,7 @@ export const MOCK_SCHOOLS: School[] = [
     {
         id: 'sch_1',
         name: 'Ghana Communication Technology University (GCTU)',
+        code: 'GCTU',
         logo: '/logos/school1.png',
         verified: true,
         address: 'Tesano, Accra',
@@ -13,6 +14,7 @@ export const MOCK_SCHOOLS: School[] = [
     {
         id: 'sch_2',
         name: 'Tech University of Ghana',
+        code: 'TUG',
         logo: '/logos/school2.png',
         verified: true,
         address: '45 Innovation Drive, Kumasi',

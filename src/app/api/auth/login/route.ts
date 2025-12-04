@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { comparePassword, signToken } from '@/lib/auth';
+import { createAuditLog } from '@/lib/audit';
 
 export async function POST(request: Request) {
     try {
@@ -41,6 +42,9 @@ export async function POST(request: Request) {
         }
 
         const token = signToken({ userId: user.id, email: user.email, role: user.role });
+
+        // Log successful login
+        await createAuditLog(user.id, 'LOGIN', `User logged in: ${user.email}`);
 
         const response = NextResponse.json({
             user: {

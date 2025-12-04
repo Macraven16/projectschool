@@ -3,8 +3,15 @@
 import Link from "next/link";
 import { GraduationCap } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { usePathname } from "next/navigation";
 
 export function Footer() {
+    const pathname = usePathname();
+
+    if (pathname?.startsWith("/admin")) {
+        return null;
+    }
+
     const { user } = useAuth();
     const currentYear = new Date().getFullYear();
 

@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 
 import { useAuth } from "@/lib/auth-context";
-import { MOCK_STUDENTS, MOCK_SCHOOLS } from "@/lib/mock-data";
 import { User, Mail, School, Hash, GraduationCap, Phone, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
@@ -13,11 +12,17 @@ export default function StudentProfilePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
+    const [usingMock, setUsingMock] = useState(false);
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {
                 const token = localStorage.getItem("school_fintech_token");
-                if (!token) return;
+                if (!token) {
+                    console.warn("No token found, using mock data");
+                    setUsingMock(true);
+                    return;
+                }
 
                 const res = await fetch("/api/students/profile", {
                     headers: { Authorization: `Bearer ${token}` },
@@ -26,14 +31,16 @@ export default function StudentProfilePage() {
                 if (res.ok) {
                     const data = await res.json();
                     setStudent(data);
+                    setUsingMock(false);
                 } else {
-                    // Fallback to mock if API fails (for demo without DB)
                     console.warn("Failed to fetch profile, using fallback");
-                    // setError("Failed to load profile");
+                    setError("Failed to load live profile. Showing demo data.");
+                    setUsingMock(true);
                 }
             } catch (err) {
                 console.error("Profile fetch error", err);
-                // setError("Failed to load profile");
+                setError("Network error. Showing demo data.");
+                setUsingMock(true);
             } finally {
                 setLoading(false);
             }
@@ -52,10 +59,10 @@ export default function StudentProfilePage() {
 
     // Fallback data if API failed or no data
     const displayStudent = student || {
-        grade: "Level 100",
-        studentIdNumber: "GCTU-2023-001",
-        campus: "Main Campus",
-        school: { name: "Ghana Communication Technology University (GCTU)" }
+        grade: "N/A",
+        studentIdNumber: "N/A",
+        campus: "N/A",
+        school: { name: "No School Assigned" }
     };
 
     return (
@@ -63,6 +70,11 @@ export default function StudentProfilePage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
                 <p className="text-muted-foreground">Manage your personal and academic information.</p>
+                {usingMock && (
+                    <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg text-yellow-600 text-sm">
+                        <strong>Note:</strong> {error || "Viewing demo data. Live data could not be loaded."}
+                    </div>
+                )}
             </div>
 
             <div className="grid gap-6 md:grid-cols-[300px_1fr]">

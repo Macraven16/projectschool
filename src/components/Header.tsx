@@ -12,8 +12,8 @@ export function Header() {
     const { user, logout } = useAuth();
     const pathname = usePathname();
 
-    // Hide header on login and signup pages
-    if (pathname === "/login" || pathname === "/signup") {
+    // Hide header on login, signup, and admin pages
+    if (pathname === "/login" || pathname === "/signup" || pathname?.startsWith("/admin")) {
         return null;
     }
 
@@ -24,7 +24,7 @@ export function Header() {
                     <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
                         <GraduationCap className="h-5 w-5" />
                     </div>
-                    <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">EduPay</span>
+                    {!user && <span className="bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">EduPay</span>}
                 </Link>
                 <div className="flex items-center gap-3">
                     <SystemStatus />

@@ -1,0 +1,20 @@
+export const GHANA_UNIVERSITIES = [
+    "University of Ghana (UG)",
+    "Kwame Nkrumah University of Science and Technology (KNUST)",
+    "University of Cape Coast (UCC)",
+    "University of Education, Winneba (UEW)",
+    "Ghana Communication Technology University (GCTU)",
+    "Ghana Institute of Management and Public Administration (GIMPA)",
+    "University of Mines and Technology (UMaT)",
+    "University of Professional Studies, Accra (UPSA)",
+    "University of Health and Allied Sciences (UHAS)",
+    "University of Energy and Natural Resources (UENR)",
+    "University for Development Studies (UDS)",
+    "Accra Technical University (ATU)",
+    "Kumasi Technical University (KsTU)",
+    "Ashesi University",
+    "Central University",
+    "Valley View University",
+    "Knutsford University College",
+    "Other"
+];

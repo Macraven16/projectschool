@@ -44,3 +44,24 @@ export function getUserRoleFromRequest(req: NextRequest): string | null {
     const decoded = verifyToken(token);
     return decoded?.role || null;
 }
+
+export function canPerformAction(userRole: string, action: 'create' | 'update' | 'delete', targetRole: string): boolean {
+    if (userRole === 'MASTER_ADMIN') return true;
+    if (userRole === 'ADMIN') {
+        // Admin cannot delete/update Master Admin or other Admins (depending on policy, let's say they can't touch Master)
+        if (targetRole === 'MASTER_ADMIN') return false;
+        return true;
+    }
+    if (userRole === 'STAFF') {
+        // Staff can only manage Students
+        if (targetRole === 'STUDENT') {
+            // Staff can create/update students, but DELETE requires approval (handled in API logic, this helper checks general permission)
+            // For 'delete', we might return false here to enforce the request flow, or handle it in the API.
+            // Let's say this helper defines "direct" permission.
+            if (action === 'delete') return false; // Staff cannot directly delete
+            return true;
+        }
+        return false;
+    }
+    return false;
+}

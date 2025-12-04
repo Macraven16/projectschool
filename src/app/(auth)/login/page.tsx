@@ -42,8 +42,11 @@ export default function LoginPage() {
                 <div className="mx-auto w-full max-w-sm space-y-6">
                     <div className="space-y-2 text-center">
                         <div className="flex justify-center mb-4">
-                            <div className="h-12 w-12 rounded-xl bg-primary flex items-center justify-center text-primary-foreground">
-                                <GraduationCap className="h-7 w-7" />
+                            <div className="flex items-center gap-2 font-bold text-2xl mb-8">
+                                <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+                                    <GraduationCap className="h-6 w-6" />
+                                </div>
+                                <span className="text-foreground">Edu<span className="text-blue-600">Pay</span></span>
                             </div>
                         </div>
                         <h1 className="text-3xl font-bold tracking-tight">Welcome back</h1>

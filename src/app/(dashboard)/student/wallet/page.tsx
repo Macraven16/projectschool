@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MOCK_TRANSACTIONS } from "@/lib/mock-data";
+import { useAuth } from "@/lib/auth-context";
 import { Wallet, ArrowUpRight, ArrowDownLeft, QrCode, History, Filter, X, ScanLine } from "lucide-react";
 
 export default function WalletPage() {
@@ -12,7 +12,10 @@ export default function WalletPage() {
     const [filterType, setFilterType] = useState<"ALL" | "CREDIT" | "DEBIT">("ALL");
     const [topUpAmount, setTopUpAmount] = useState("");
 
+    const { user } = useAuth();
     const [balance, setBalance] = useState(0.00);
+    const [totalSpent, setTotalSpent] = useState(0);
+    const [totalSavings, setTotalSavings] = useState(0);
     const [transactions, setTransactions] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -21,17 +24,33 @@ export default function WalletPage() {
             const token = localStorage.getItem("school_fintech_token");
             if (!token) return;
 
-            const res = await fetch("/api/wallet", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
+            const headers = { Authorization: `Bearer ${token}` };
 
-            if (res.ok) {
-                const data = await res.json();
+            const [walletRes, savingsRes] = await Promise.all([
+                fetch("/api/wallet", { headers }),
+                fetch(`/api/savings?studentId=${user?.student?.id}`, { headers }) // Assuming user is available from useAuth
+            ]);
+
+            if (walletRes.ok) {
+                const data = await walletRes.json();
                 setBalance(data.balance);
                 setTransactions(data.transactions);
+
+                // Calculate Total Spent (Sum of non-TOPUP transactions)
+                const spent = data.transactions
+                    .filter((tx: any) => tx.type !== 'TOPUP')
+                    .reduce((sum: number, tx: any) => sum + tx.amount, 0);
+                setTotalSpent(spent);
+            }
+
+            if (savingsRes.ok) {
+                const savingsData = await savingsRes.json();
+                // Sum up current amounts of all savings goals
+                const totalSaved = savingsData.reduce((sum: number, goal: any) => sum + goal.currentAmount, 0);
+                setTotalSavings(totalSaved);
             }
         } catch (error) {
-            console.error("Failed to fetch wallet", error);
+            console.error("Failed to fetch wallet data", error);
         } finally {
             setLoading(false);
         }
@@ -187,17 +206,17 @@ export default function WalletPage() {
                             <CardTitle className="text-sm font-medium text-muted-foreground">Total Spent</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">GHS 450.00</div>
-                            <p className="text-xs text-muted-foreground mt-1">This month</p>
+                            <div className="text-2xl font-bold">GHS {totalSpent.toLocaleString()}</div>
+                            <p className="text-xs text-muted-foreground mt-1">Total Spent</p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Savings</CardTitle>
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Total Savings</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">GHS 50.00</div>
-                            <p className="text-xs text-green-600 mt-1">+10% goal</p>
+                            <div className="text-2xl font-bold">GHS {totalSavings.toLocaleString()}</div>
+                            <p className="text-xs text-green-600 mt-1">Across all goals</p>
                         </CardContent>
                     </Card>
                 </div>
