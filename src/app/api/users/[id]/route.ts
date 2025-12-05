@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserRoleFromRequest, getUserIdFromRequest } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
+import { backfillInvoicesForStudent } from '@/lib/fees';
 
 export async function DELETE(
     request: Request,
@@ -94,7 +95,7 @@ export async function PUT(
         }
 
         // Update user and related student record in a transaction
-        const updatedUser = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx) => {
             const user = await tx.user.update({
                 where: { id },
                 data: {
@@ -105,14 +106,19 @@ export async function PUT(
                 }
             });
 
+            let studentId = "";
+            let targetSchoolId = "";
+
             // If user is a student and index number is provided, update/create student record
             if (role === 'STUDENT' && indexNumber) {
-                await tx.student.upsert({
+                targetSchoolId = schoolId || user.schoolId || "";
+
+                const student = await tx.student.upsert({
                     where: { userId: id },
                     create: {
                         userId: id,
                         studentIdNumber: indexNumber,
-                        schoolId: schoolId || user.schoolId, // Use provided schoolId or existing
+                        schoolId: targetSchoolId, // Use provided schoolId or existing
                         grade: "N/A" // Default grade as it's required
                     },
                     update: {
@@ -120,15 +126,23 @@ export async function PUT(
                         schoolId: schoolId || undefined
                     }
                 });
+                studentId = student.id;
             }
 
-            return user;
+            return { user, studentId, targetSchoolId };
         });
+
+        const { user: updatedUser, studentId, targetSchoolId } = result;
 
         // Log action
         const requesterId = getUserIdFromRequest(request as any);
         if (requesterId) {
             await createAuditLog(requesterId, 'UPDATE_USER', `Updated user ${updatedUser.email} (${updatedUser.role})`);
+        }
+
+        // Backfill invoices if we have a student and a school
+        if (studentId && targetSchoolId) {
+            await backfillInvoicesForStudent(studentId, targetSchoolId);
         }
 
         return NextResponse.json(updatedUser);

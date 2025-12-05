@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, getUserRoleFromRequest, getUserIdFromRequest } from '@/lib/auth';
 import { createAuditLog } from '@/lib/audit';
+import { backfillInvoicesForStudent } from '@/lib/fees';
 
 export async function GET(request: Request) {
     try {
@@ -69,6 +70,32 @@ export async function POST(request: Request) {
                 phoneNumber: phoneNumber || null,
             },
         });
+
+        // If creating a student, create the specific student record and backfill invoices
+        if (newUserRole === 'STUDENT' && schoolId) {
+            try {
+                // Generate a temporary ID if not provided (Admin can update later)
+                const studentIdNumber = `ID-${Date.now()}`;
+
+                const student = await prisma.student.create({
+                    data: {
+                        userId: user.id,
+                        schoolId: schoolId,
+                        studentIdNumber: studentIdNumber,
+                        grade: "Level 100", // Default
+                        campus: "Main Campus", // Default
+                        wallet: {
+                            create: { balance: 0.0 }
+                        }
+                    }
+                });
+
+                await backfillInvoicesForStudent(student.id, schoolId);
+            } catch (studentError) {
+                console.error("Failed to auto-create student profile during user creation:", studentError);
+                // We don't rollback the user, but we log the error. Admin can fix via Edit.
+            }
+        }
 
         // Log action
         const creatorId = getUserIdFromRequest(request as any);

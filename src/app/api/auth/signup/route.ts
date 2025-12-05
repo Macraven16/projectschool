@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, signToken } from '@/lib/auth';
+import { backfillInvoicesForStudent } from '@/lib/fees';
 
 export async function POST(request: Request) {
     try {
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
                     data: { schoolId: schoolId }
                 });
 
-                await prisma.student.create({
+                const student = await prisma.student.create({
                     data: {
                         userId: user.id,
                         schoolId: schoolId,
@@ -86,6 +87,9 @@ export async function POST(request: Request) {
                         },
                     },
                 });
+
+                // Backfill invoices for the new student
+                await backfillInvoicesForStudent(student.id, schoolId);
             }
         }
 
